@@ -4,26 +4,89 @@
 <head>
   <title>Socket.IO chat</title>
   <style>
-   * { margin: 0; padding: 0; box-sizing: border-box; }
-   body { font: 13px Helvetica, Arial; }
-   form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-   form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-   form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-   #messages { list-style-type: none; margin: 0; padding: 0; }
-   #messages li { padding: 5px 10px; }
-   #messages li:nth-child(odd) { background: #eee; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-   #messages span.nickname { font-weight: bold; font-size: 120%; display: inline-block; width: 100px; }
+    body {
+      font: 13px Helvetica, Arial;
+    }
+
+    form {
+      background: #000;
+      padding: 3px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    form input {
+      border: 0;
+      padding: 10px;
+      width: 90%;
+      margin-right: .5%;
+    }
+
+    form button {
+      width: 9%;
+      background: rgb(130, 224, 255);
+      border: none;
+      padding: 10px;
+    }
+
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #messages li {
+      padding: 5px 10px;
+    }
+
+    #messages li:nth-child(odd) {
+      background: #eee;
+    }
+
+    #messages span.nickname {
+      font-weight: bold;
+      font-size: 120%;
+      display: inline-block;
+      width: 100px;
+    }
 
 
-   div.userList { text-align: center; width: 200px; min-height: 200px; border: 1px solid #999;}
-   #userList { list-style-type: none; margin: 0; padding: 0; }
-   #userList li { }
+    div.userList {
+      text-align: center;
+      width: 200px;
+      min-height: 200px;
+      border: 1px solid #999;
+    }
 
-   #before { text-align: center; margin-top: 50%; }
-   #after { display: none; }
-   .noti { text-align: center; color: blue; }
- </style>
+    #userList {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #userList li {}
+
+    #before {
+      text-align: center;
+      margin-top: 50%;
+    }
+
+    #after {
+      display: none;
+    }
+
+    .noti {
+      text-align: center;
+      color: blue;
+    }
+  </style>
 
 </head>
 
@@ -48,86 +111,83 @@
   </section>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
-
+  <script src="//code.jquery.com/jquery.min.js"></script>
   <script>
-  var nickname;
-  var socket = io();
+    var nickname;
+    var socket = io();
 
-  // 이벤트: join클릭
-  $('#joinBtn').click(function(e){
-    console.log('들어가기 버튼클릭');
-    fnNickname(e);
-  });
-
-  // 이벤트: nickname 엔터키
-  $('#nickname').keypress(function(e){
-    if(e.which == 13){
+    // 이벤트: join클릭
+    $('#joinBtn').click(function(e) {
+      console.log('들어가기 버튼클릭');
       fnNickname(e);
-    }
-  });
+    });
 
-  // 송신: 닉네임
-  function fnNickname(e){
-    if($('#nickname').val().trim() == ''){
-      alert('닉네임을 적어주세요');
+    // 이벤트: nickname 엔터키
+    $('#nickname').keypress(function(e) {
+      if (e.which == 13) {
+        fnNickname(e);
+      }
+    });
+
+    // 송신: 닉네임
+    function fnNickname(e) {
+      if ($('#nickname').val().trim() == '') {
+        alert('닉네임을 적어주세요');
+        return false;
+      }
+      nickname = $('#nickname').val().trim();
+      socket.emit('join', nickname); // 접속 이벤트
+    }
+
+    // 수신: 환영인사
+    socket.on('welcome', function(data) {
+      // 유저리스트 업데이트
+      fnUpdateUserList(data.userList);
+
+      $('#before').hide();
+      $('#after').show();
+      $('#messages').append($('<li class="noti">').text(nickname + '님 환영합니다.'));
+    });
+
+    // 유저리스트 업데이트
+    function fnUpdateUserList(userList) {
+      $('#userList').text('');
+      for (i = 0; i < userList.length; i++) {
+        $('#userList').append($('<li>').text(userList[i]));
+      }
+    }
+
+    // 수신: 신규자 접속
+    socket.on('join', function(data) {
+      // 입장 알림
+      $('#messages').append($('<li class="noti">').text(data.nickname + '님이 입장하셨습니다'));
+
+      // 유저리스트 업데이트
+      fnUpdateUserList(data.userList);
+    });
+
+    // 수신: 퇴장
+    socket.on('left', function(data) {
+      // 종료 알림
+      $('#messages').append($('<li class="noti">').text(data.nickname + '님이 퇴장하셨습니다'));
+
+      // 유저리스트 업데이트
+      fnUpdateUserList(data.userList);
+    });
+
+    // 송신: 메시지
+    $('form').submit(function() {
+      socket.emit('msg', $('#m').val());
+      $('#m').val('');
       return false;
-    }
-    nickname = $('#nickname').val().trim();
-    socket.emit('join', nickname); // 접속 이벤트
-  }
+    });
 
-  // 수신: 환영인사
-  socket.on('welcome', function(data){
-    // 유저리스트 업데이트
-    fnUpdateUserList(data.userList);
-
-    $('#before').hide();
-    $('#after').show();
-    $('#messages').append($('<li class="noti">').text(nickname + '님 환영합니다.'));
-  });
-
-  // 유저리스트 업데이트
-  function fnUpdateUserList(userList) {
-    $('#userList').text('');
-    for (i = 0; i < userList.length; i++) {
-      $('#userList').append($('<li>').text(userList[i]));
-    }
-  }
-
-  // 수신: 신규자 접속
-  socket.on('join', function(data){
-    // 입장 알림
-    $('#messages').append($('<li class="noti">').text(data.nickname + '님이 입장하셨습니다'));
-
-    // 유저리스트 업데이트
-    fnUpdateUserList(data.userList);
-  });
-
-  // 수신: 퇴장
-  socket.on('left', function(data){
-    // 종료 알림
-    $('#messages').append($('<li class="noti">').text(data.nickname + '님이 퇴장하셨습니다'));
-
-    // 유저리스트 업데이트
-    fnUpdateUserList(data.userList);
-  });
-
-  // 송신: 메시지
-  $('form').submit(function(){
-    socket.emit('msg', $('#m').val());
-    $('#m').val('');
-    return false;
-  });
-
-  // 수신: 메시지
-  socket.on('msg', function(data){
-    var span = $('<span class="nickname">').text(data.nickname);
-    var li = $('<li>').append(span).append(data.msg);
-    $('#messages').append(li);
-  });
-
-
+    // 수신: 메시지
+    socket.on('msg', function(data) {
+      var span = $('<span class="nickname">').text(data.nickname);
+      var li = $('<li>').append(span).append(data.msg);
+      $('#messages').append(li);
+    });
   </script>
 
 
