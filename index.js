@@ -8,6 +8,7 @@ app.get('/', function(req, res) {
 
 var userList = [];
 
+// port를 이렇게 설정해야 heroku에서 셋팅한 포트를 사용할수 있다.
 var port = process.env.PORT || 3000;
 http.listen(port, function() {
   console.log('listening on *:3000');
