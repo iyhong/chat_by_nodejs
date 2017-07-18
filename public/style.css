@@ -1,0 +1,83 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font: 13px Helvetica, Arial;
+}
+
+form {
+  background: #000;
+  padding: 3px;
+  position: relative;
+  bottom: 10;
+  width: 90%;
+}
+
+form input {
+  border: 0;
+  padding: 10px;
+  width: 90%;
+  margin-right: .5%;
+}
+
+form button {
+  width: 9%;
+  background: rgb(130, 224, 255);
+  border: none;
+  padding: 10px;
+}
+
+#messages {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+#messages li {
+  padding: 5px 10px;
+}
+
+#messages li:nth-child(odd) {
+  background: #eee;
+}
+
+#messages span.nickname {
+  font-weight: bold;
+  font-size: 120%;
+  display: inline-block;
+  width: 100px;
+}
+
+
+div.userList {
+  text-align: center;
+  width: 200px;
+  min-height: 200px;
+  border: 1px solid #999;
+}
+
+#userList {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+#userList li {}
+
+#before {
+  text-align: center;
+  margin-top: 10%;
+}
+
+#after {
+  display: none;
+  margin: 5% 5% 0% 5%;
+}
+
+.noti {
+  text-align: center;
+  color: blue;
+}
